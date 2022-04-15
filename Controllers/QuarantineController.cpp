@@ -5,29 +5,25 @@
 #include "../Headers/QuarantineController.h"
 #include "openssl/aes.h"
 #include <filesystem>
-#include <openssl/rand.h>
-#include <fstream>
 #include <cstring>
 #include "../Headers/FileManager.h"
-#include "../Headers/ConfigurationVariables.h"
 #include <openssl/sha.h>
 #include "../Headers/FileHasher.h"
 
 using std::filesystem::path;
 using std::string;
 
-//TODO: set 0 permissions
 void QuarantineController::imposeQuarantine(path file_path) {
     //File is already verified by FileController
     file_path = followSymlinks(file_path);
     std::string file_name = file_path.stem();//get file name
     std::filesystem::path destination_path = quarantine_path/file_name;//create new path
-    quarantine_records.push_back(QuarantineRecord(file_path, calculateFileHash(file_path)));//save source path and hash
+    quarantine_records.emplace_back(file_path, calculateFileHash(file_path));//save source path and hash
     useCipher(file_path,destination_path);//encrypt file
     std::filesystem::remove(file_path);//remove from current location
 }
 
-bool QuarantineController::removeQuarantine(std::string file_name) {
+bool QuarantineController::removeQuarantine(const std::string& file_name) {
     int position = 0;
     bool found = false;
     for (const auto &item : quarantine_records){
@@ -53,7 +49,7 @@ bool QuarantineController::removeQuarantine(std::string file_name) {
 
 
 
-void QuarantineController::useCipher(path file_path, path destination_path) {
+void QuarantineController::useCipher(const path& file_path, const path& destination_path) {
     int bytes_read, bytes_written;
     unsigned char indata[AES_BLOCK_SIZE];
     unsigned char outdata[AES_BLOCK_SIZE];
@@ -97,19 +93,17 @@ void QuarantineController::saveQuarantineRecords() {
 
 
 
-void QuarantineController::setPassword(const string &password) {
-    QuarantineController::password = password;
+void QuarantineController::setPassword(const string &pwd) {
+    password = pwd;
 }
 
-QuarantineController::QuarantineController() {
+QuarantineController::QuarantineController() = default;
 
-}
+void QuarantineController::init(const path& quarantine_directory_path) {
+    this->quarantine_path = quarantine_directory_path;
+    quarantine_list_path = quarantine_directory_path.parent_path() / "list";
 
-void QuarantineController::init(path quarantine_path) {
-    this->quarantine_path = quarantine_path;
-    quarantine_list_path = quarantine_path.parent_path()/"list";
-
-    std::filesystem::create_directories(quarantine_path);
+    std::filesystem::create_directories(quarantine_directory_path);
     if (std::filesystem::exists(quarantine_list_path))
         quarantine_records = readQuarantineRecords(quarantine_list_path);
 }

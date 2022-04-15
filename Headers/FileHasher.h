@@ -6,7 +6,7 @@
 #ifndef ANTIVIRUS_FILEHASHER_H
 #define ANTIVIRUS_FILEHASHER_H
 
-std::string calculateFileHash(std::string file_name);
+std::string calculateFileHash(const std::string& file_name);
 std::string hashToHexString(unsigned char *digest);
 const int MD5_LENGTH = 16;
 

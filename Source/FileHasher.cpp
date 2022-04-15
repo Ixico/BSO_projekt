@@ -6,9 +6,6 @@
 #include "../Headers/FileHasher.h"
 #include <iostream>
 #include <openssl/md5.h>
-#include <sstream>
-#include <cstring>
-#include <iomanip>
 #include <fstream>
 #include "../Headers/FileManager.h"
 
@@ -26,7 +23,7 @@ string hashToHexString(unsigned char *digest){
 }
 
 
-string calculateFileHash(string file_name){
+string calculateFileHash(const string& file_name){
     MD5_CTX ctx;
     MD5_Init(&ctx);
 

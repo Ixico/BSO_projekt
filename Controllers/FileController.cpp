@@ -8,13 +8,11 @@
 #include <iostream>
 #include <vector>
 #include <filesystem>
-#include "../Headers/ConfigurationVariables.h"
 
 using std::string;
 using std::unordered_set;
 using std::vector;
 using std::filesystem::path;
-unordered_set <std::string> hashes;
 
 
 bool FileController::isFileDangerous(path file_path) {
@@ -31,16 +29,20 @@ vector<path> FileController::findDangerousFiles(path directory_path){
     if(!std::filesystem::is_directory(directory_path)) throw std::invalid_argument("It is not directory path!");
     vector<path> files = findFilesInDirectory(directory_path);
     vector<path> dangerous_files;
+    int iterator = 1;
     for (const auto &file : files){
-        if (isFileDangerous(file)) dangerous_files.push_back(file);
+        std::cout << "Scanned files: " << iterator << "/" << files.size() << "\r";
+        try {
+            if (isFileDangerous(file)) dangerous_files.push_back(file);
+        } catch (std::invalid_argument &e){} //skip files that cannot be scanned
+        iterator++;
     }
     return dangerous_files;
 }
 
 
-FileController::FileController() {
-}
+FileController::FileController() = default;
 
-void FileController::init(path database_path) {
+void FileController::init(const path& database_path) {
     hashes = readDatabaseRecords(database_path);
 }

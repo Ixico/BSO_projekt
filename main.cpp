@@ -19,12 +19,11 @@ using std::filesystem::path;
 
 
 int main(int argc, char* argcv[]) {
-    CLIController cli_controller;
     FileController file_controller;
     QuarantineController quarantine_controller;
     path app_path;
     if (geteuid()==0){
-        app_path = "/root";
+        app_path = "/root/L_Antivirus";
     } else {
         string user_name = getlogin();
         app_path = "/home/" +user_name+ "/L_Antivirus";
@@ -33,35 +32,33 @@ int main(int argc, char* argcv[]) {
         quarantine_controller.init(app_path/"quarantine");
         file_controller.init(app_path/"database");
     } catch (std::exception &e){
-        cli_controller.printInitFailure();
+        CLIController::printInitFailure();
         return EXIT_FAILURE;
     }
-//    cli_controller.printHelp();
-//    quarantine_controller.setPassword("pogchamp");
-//    quarantine_controller.imposeQuarantine("/home/ixico/Desktop/dtest6");
-//    quarantine_controller.saveQuarantineRecords();
+
     if (argc == 1) {
-        cli_controller.printWelcomePage();
+        CLIController::printWelcomePage();
         return EXIT_SUCCESS;
     }
 
     if (argcv[1] == string("-scanf")){
         if (argc != 3){
-            cli_controller.printScanfArgumentProblem();
+            CLIController::printScanfArgumentProblem();
             return EXIT_FAILURE;
         }
         path file_path = argcv[2];
         try {
             if (file_controller.isFileDangerous(file_path)) {
-                cli_controller.printDangerous();
-                cli_controller.printPasswordPrompt();
+                CLIController::printDangerous();
+                CLIController::printPasswordPrompt();
                 string password;
                 std::cin >> password;
                 quarantine_controller.setPassword(password);
                 quarantine_controller.imposeQuarantine(file_path);
                 quarantine_controller.saveQuarantineRecords();
+                CLIController::printImposeSuccess();
             } else {
-                cli_controller.printSafe();
+                CLIController::printSafe();
             }
             return EXIT_SUCCESS;
         } catch (std::exception &e) {
@@ -71,15 +68,15 @@ int main(int argc, char* argcv[]) {
     }
     if (argcv[1] == string("-scand")){
         if (argc != 3){
-            cli_controller.printScandArgumentProblem();
+            CLIController::printScandArgumentProblem();
             return EXIT_FAILURE;
         }
         path directory_path = argcv[2];
         try {
             vector<path> dangerous;
             dangerous = file_controller.findDangerousFiles(directory_path);
-            cli_controller.printDangerous(dangerous);
-            cli_controller.printPasswordPrompt();
+            CLIController::printDangerous(dangerous);
+            CLIController::printPasswordPrompt();
             string password;
             std::cin >> password;
             quarantine_controller.setPassword(password);
@@ -90,27 +87,30 @@ int main(int argc, char* argcv[]) {
             return EXIT_FAILURE;
         }
         quarantine_controller.saveQuarantineRecords();
+        CLIController::printImposeSuccess();
         return EXIT_SUCCESS;
     }
 
     else if (argcv[1] == string("-quarantine")){
         if (argc != 2){
-            cli_controller.printQuarantineArgumentProblem();
+            CLIController::printQuarantineArgumentProblem();
             return EXIT_FAILURE;
         }
-        cli_controller.printQuarantineRecords(quarantine_controller.getQuarantineRecords());
+        CLIController::printQuarantineRecords(quarantine_controller.getQuarantineRecords());
+        return EXIT_SUCCESS;
     }
 
     else if (argcv[1] == string("-restore")){
         if (argc != 3){
-            cli_controller.printRestoreArgumentProblem();
+            CLIController::printRestoreArgumentProblem();
             return EXIT_FAILURE;
         }
+        CLIController::printPasswordPromptRestore();
         string password;
         std::cin >> password;
         quarantine_controller.setPassword(password);
         try {
-            quarantine_controller.removeQuarantine(argcv[2]) ? cli_controller.printRestoreSuccess() : cli_controller.printRestoreFailure();
+            quarantine_controller.removeQuarantine(argcv[2]) ? CLIController::printRestoreSuccess() : CLIController::printRestoreFailure();
         } catch (std::invalid_argument &e) {
             cout << e.what() << endl;
         }
@@ -118,9 +118,17 @@ int main(int argc, char* argcv[]) {
         return EXIT_SUCCESS;
     }
 
+    else if (argcv[1] == string("-help")) {
+        if (argc != 2){
+            CLIController::printHelpArgumentProblem();
+            return EXIT_FAILURE;
+        }
+        CLIController::printHelp();
+        return EXIT_SUCCESS;
+    }
+
     else {
-        cli_controller.printArgumentProblem();
+        CLIController::printArgumentProblem();
         return EXIT_FAILURE;
     }
-    return 0;
 }

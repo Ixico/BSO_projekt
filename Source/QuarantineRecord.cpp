@@ -4,10 +4,12 @@
 
 #include "../Headers/QuarantineRecord.h"
 
-QuarantineRecord::QuarantineRecord(const std::filesystem::path &filePath, const std::string &digest) : file_path(
-        filePath), digest(digest) {}
+#include <utility>
 
-QuarantineRecord::QuarantineRecord() {}
+QuarantineRecord::QuarantineRecord(std::filesystem::path filePath, std::string digest) : file_path(std::move(
+        filePath)), digest(std::move(digest)) {}
+
+QuarantineRecord::QuarantineRecord() = default;
 
 std::ostream &operator<<(std::ostream &os, const QuarantineRecord &record) {
     os << "file_path: " << record.file_path << " digest: " << record.digest;

@@ -12,34 +12,40 @@
 
 class CLIController {
 public:
-    void printWelcomePage();
-    void printHelp();
+    static void printWelcomePage();
+    static void printHelp();
 
-    void printDangerous();
+    static void printDangerous();
 
-    void printSafe();
+    static void printSafe();
 
-    void printInitFailure();
+    static void printInitFailure();
 
-    void printDangerous(std::vector<std::filesystem::path> vector1);
+    static void printDangerous(const std::vector<std::filesystem::path>& vector1);
 
-    void printScanfArgumentProblem();
+    static void printScanfArgumentProblem();
 
-    void printScandArgumentProblem();
+    static void printScandArgumentProblem();
 
-    void printPasswordPrompt();
+    static void printPasswordPrompt();
 
-    void printQuarantineRecords(const std::vector<QuarantineRecord> &vector);
+    static void printQuarantineRecords(const std::vector<QuarantineRecord> &vector);
 
-    void printQuarantineArgumentProblem();
+    static void printQuarantineArgumentProblem();
 
-    void printRestoreArgumentProblem();
+    static void printRestoreArgumentProblem();
 
-    void printRestoreSuccess();
+    static void printRestoreSuccess();
 
-    void printRestoreFailure();
+    static void printRestoreFailure();
 
-    void printArgumentProblem();
+    static void printArgumentProblem();
+
+    static void printHelpArgumentProblem();
+
+    static void printImposeSuccess();
+
+    static void printPasswordPromptRestore();
 };
 
 

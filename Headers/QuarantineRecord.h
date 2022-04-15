@@ -17,7 +17,7 @@ public:
 
     QuarantineRecord();
 
-    QuarantineRecord(const std::filesystem::path &filePath, const std::string &digest);
+    QuarantineRecord(std::filesystem::path filePath, std::string digest);
 
 private:
 

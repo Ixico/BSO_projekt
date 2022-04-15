@@ -12,7 +12,7 @@
 class FileController {
 public:
     FileController();
-    void init(std::filesystem::path database_path);
+    void init(const std::filesystem::path& database_path);
     bool isFileDangerous(std::filesystem::path file_path);
     std::vector<std::filesystem::path> findDangerousFiles(std::filesystem::path directory_path);
 

@@ -4,8 +4,6 @@
 
 #include "../Headers/CLIController.h"
 #include <iostream>
-#include <cctype>
-#include "../Headers/QuarantineRecord.h"
 using std::cout;
 using std::endl;
 
@@ -42,11 +40,11 @@ void CLIController::printSafe() {
 
 void CLIController::printInitFailure() {
     cout << "Initialization fatal error!" << endl;
-
+    cout << "Check if directory /home/user/L_Antivirus contains database file!" << endl;
 }
 
-void CLIController::printDangerous(std::vector<std::filesystem::path> vector1) {
-    if (vector1.size() == 0){
+void CLIController::printDangerous(const std::vector<std::filesystem::path>& vector1) {
+    if (vector1.empty()){
         cout << "No dangerous files found" << endl;
         return;
     }
@@ -68,7 +66,7 @@ void CLIController::printScandArgumentProblem() {
 }
 
 void CLIController::printPasswordPrompt() {
-    cout << "Put password to secure your quarantine." << endl;
+    cout << "Put password to secure file in your quarantine." << endl;
     cout << "You will need to use it again if you want to restore your files." << endl;
     cout << "Password:" << endl;
 }
@@ -83,22 +81,43 @@ void CLIController::printQuarantineRecords(const std::vector<QuarantineRecord> &
 }
 
 void CLIController::printRestoreArgumentProblem() {
-
+    cout << "Misuse of arguments" << endl;
+    cout << "SYNTAX:" << endl;
+    cout << "./L_Antivirus -restore file_name" << endl;
 }
 
 void CLIController::printQuarantineArgumentProblem() {
-
+    cout << "Misuse of arguments" << endl;
+    cout << "SYNTAX:" << endl;
+    cout << "./L_Antivirus -quarantine" << endl;
 }
 
 void CLIController::printRestoreFailure() {
-
+    cout << "Wrong password! Could not restore file form quarantine." << endl;
 }
 
 void CLIController::printRestoreSuccess() {
-
+    cout << "File successfully restored from quarantine!" << endl;
 }
 
 void CLIController::printArgumentProblem() {
+    cout << "Invalid argument" << endl;
+    cout << "Look at the help page for more details:" << endl;
+    cout << "./L_Antivirus -help" << endl;
+}
 
+void CLIController::printHelpArgumentProblem() {
+    cout << "Misuse of arguments" << endl;
+    cout << "SYNTAX:" << endl;
+    cout << "./L_Antivirus -help" << endl;
+}
 
+void CLIController::printImposeSuccess() {
+    cout << "File(s) successfully imposed on quarantine." << endl;
+}
+
+void CLIController::printPasswordPromptRestore() {
+    cout << "Put password to restore file from your quarantine." << endl;
+    cout << "You have to use exactly the same you've used when imposing on quarantine" << endl;
+    cout << "Password:" << endl;
 }
