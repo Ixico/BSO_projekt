@@ -23,7 +23,10 @@ Przy rozważaniu linkowalności bibliotek należy zwrócić uwagę na dwa aspekt
 1. Rozmiar pliku wykonywalnego po skompilowaniu
 2. Wygoda użytkowania (user-friendly)
 
-Celem znalezienia pewnego kompromisu zdecydowano, że wszystkie biblioteki **domyślnie** zainstalowane na systemie UNIX, będą linkowane dynamicznie - pozwoli to zdecydowanie zmniejszyć rozmiar pliku po skompilowaniu. W aplikacji użyto jednak jednej biblioteki zewnętrznej (OpenSSL), która domyślnie wymaga instalacji. Zalinkowana została zatem w sposób statyczny.![image](https://user-images.githubusercontent.com/100531644/163628829-f804a729-3020-4663-870e-2dfce56c0770.png)
+Celem znalezienia pewnego kompromisu zdecydowano, że wszystkie biblioteki **domyślnie** zainstalowane na systemie UNIX, będą linkowane dynamicznie - pozwoli to zdecydowanie zmniejszyć rozmiar pliku po skompilowaniu. W aplikacji użyto jednak jednej biblioteki zewnętrznej (OpenSSL), która domyślnie wymaga instalacji. Zalinkowana została zatem w sposób statyczny.
+Rozmiar pliku po skompilowaniu: ok. 230kB.
+![image](https://user-images.githubusercontent.com/100531644/163628829-f804a729-3020-4663-870e-2dfce56c0770.png)
+Wygoda użytkownika: wystarczy pobrać program, załadować bazę danych i aplikacja jest gotowa do użytku.
 
 ## Algorytm funkcji skrótu
 Przy wyborze funkcji skrótu rozważono trzy kluczowe aspekty:
@@ -75,8 +78,27 @@ Biorąc pod uwagę wcześniej rozważone aspekty, w Antywirusie rolę funkcji sk
 dobrze w testach wydajnościowych. Jej największą wadą jest kolizyjność, jednak poziom prawdopodobieństwa kolizji równy <img src="https://render.githubusercontent.com/render/math?math=1.47\cdot10^{-29}"> [(*Avira)](https://www.avira.com/en/blog/md5-the-broken-algorithm) jest zdecydowanie akceptowalny.
 
 ## Uruchomienia i wyłączanie aplikacji
+Aplikacja uruchamiana jest za każdym razem na potrzebę wykonania jednego polecenia (jedno skanowanie - jedno uruchomienie). W przypadku chęci opuszczenia programu, możliwe jest wysłanie sygnału wyłączenia (Ctrl+C), które zostało obsłużone w odpowiedni sposób (aby zamknąć program w kontrolowany sposób i "wyczyścić" środowisko). Fragment kodu odpowiadający za zatrzymywanie aplikacji:
+![image](https://user-images.githubusercontent.com/100531644/163629609-59c67fc3-e50b-45c3-b39d-d4f3523edcfb.png)
+
 ## Uprawnienia uruchomieniowe aplikacji
+Aplikacja może być uruchomiona zarówno z perspektywy użytkownika, jak i roota. W zależności od wykonawcy programu, określana jest ścieżka dla niezbędnych plików/folderów programu. Są to:
+1. /L_Antivirus - folder główny
+2. /L_Antivirus/quarantine - folder będący kwarantanną
+3. /L_Antivirus/list - lista poprzednich ścieżek plików będących na kwarantannie wraz z ich skrótami
+4. /L_Antivirus/database - plik z bazą skrótów - musi zostać umieszczony w tej lokalizacji przez użytkownika, ważne jest zachowanie nazwy i formatu (dokument tekstowy, skróty w postacji hexadecymalnej - każdy w jednej linii).
+
+Przy uruchomieniu programu odbywa się weryfikacja użytkownika, aby stworzyć foldery robocze w odpowiedniej lokalizacji:
+![image](https://user-images.githubusercontent.com/100531644/163630036-ffbc8b0c-2e4e-444c-b1d1-f9038ebf6972.png)
+
+Poziom uprawnień nie ma bezpośredniego wpływu na działania programu - jednak możliwe jest tylko i wyłącznie skanowanie plików i folderów, do których mamy uprawnienia (reszta jest pomijana - domyślnie uznawana za bezpieczne, bo i tak wykonawca programu nie może ich uruchomić).
+
+Zaletą takiego podejścia jest bardzo duża uniwersalność (nie potrzebujemy uprawnień roota, aby przeskanować sobie pliki na komputerze). Ewentualnym problemem, który może się pojawić, są problemy w działaniu w pewnych szczególnych (choć rzadkich) przypadkach - np. gdyby użytkownik z jakiegoś powodu stracił uprawnienia do niezbędnych plików programu.
 ## Statystyki wydajnościowe działania
+Program wyświetla statystyki w czesie rzeczywistym podczas skanowania rekursywnego katalogu. Wyświetlanie statystyk w przypadku innych operacji uznano za niepotrzebne - są one zazwyczaj bardzo szybkie (wyjątek - skanowanie bardzo dużego pliku, zostało to jednak uznane za zbyt rzadki przypadek).
+Przykład wyżej opisanego mechanizmu (skanowanie katalogu /home):
+![image](https://user-images.githubusercontent.com/100531644/163630464-ab5bc89e-7e8a-420a-bb3c-e8a3443f510f.png)
+
 ## Przypadki użycia
 Antywirus ma działać w dwóch trybach:
 - skanowanie wskazanego pliku za pomocą ścieżki absolutnej bądź relatywnej względem folderu, w którym uruchamiana jest aplikacja
@@ -148,3 +170,8 @@ goodbye world
 ![](https://github.com/Ixico/BSO-projekt/blob/master/Documentation%20resources/basic_test.png)
 
 ## Unikanie błędów bezpieczeństwa
+Proces unikania błędów bezpieczeństwa składał się z bardzo wielu kroków:
+1. Statyczna analiza kodu przy użyciu wbudowanych narzędzi w IDE CLion (w szczególności **Clang-Tidy**)
+2. Przeprowadzenie testów użytkowych, celowego wprowadzania złego inputu, testów funkcjonalnych
+3. Dynamiczna analiza kodu - sprawdzenie działania
+4. Obsługa błędów poprzez mechanizm wyjątków
