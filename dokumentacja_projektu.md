@@ -19,7 +19,12 @@
 
 
 ## Dynamiczna i statyczna linkowalność
-W przypadku rozwa
+Przy rozważaniu linkowalności bibliotek należy zwrócić uwagę na dwa aspekty:
+1. Rozmiar pliku wykonywalnego po skompilowaniu
+2. Wygoda użytkowania (user-friendly)
+
+Celem znalezienia pewnego kompromisu zdecydowano, że wszystkie biblioteki **domyślnie** zainstalowane na systemie UNIX, będą linkowane dynamicznie - pozwoli to zdecydowanie zmniejszyć rozmiar pliku po skompilowaniu. W aplikacji użyto jednak jednej biblioteki zewnętrznej (OpenSSL), która domyślnie wymaga instalacji. Zalinkowana została zatem w sposób statyczny.![image](https://user-images.githubusercontent.com/100531644/163628829-f804a729-3020-4663-870e-2dfce56c0770.png)
+
 ## Algorytm funkcji skrótu
 Przy wyborze funkcji skrótu rozważono trzy kluczowe aspekty:
 1. Standardowe wybory twórców baz danych
