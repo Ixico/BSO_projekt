@@ -25,6 +25,7 @@ Przy rozważaniu linkowalności bibliotek należy zwrócić uwagę na dwa aspekt
 
 Celem znalezienia pewnego kompromisu zdecydowano, że wszystkie biblioteki **domyślnie** zainstalowane na systemie UNIX, będą linkowane dynamicznie - pozwoli to zdecydowanie zmniejszyć rozmiar pliku po skompilowaniu. W aplikacji użyto jednak jednej biblioteki zewnętrznej (OpenSSL), która domyślnie wymaga instalacji. Zalinkowana została zatem w sposób statyczny.
 Rozmiar pliku po skompilowaniu: ok. 230kB.
+
 ![image](https://user-images.githubusercontent.com/100531644/163628829-f804a729-3020-4663-870e-2dfce56c0770.png)
 Wygoda użytkownika: wystarczy pobrać program, załadować bazę danych i aplikacja jest gotowa do użytku.
 
