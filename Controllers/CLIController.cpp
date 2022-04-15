@@ -68,6 +68,7 @@ void CLIController::printScandArgumentProblem() {
 void CLIController::printPasswordPrompt() {
     cout << "Put password to secure file in your quarantine." << endl;
     cout << "You will need to use it again if you want to restore your files." << endl;
+    cout << "If you do not want to impose quarantine on file, use CTRL+C to leave" << endl;
     cout << "Password:" << endl;
 }
 
@@ -119,6 +120,7 @@ void CLIController::printImposeSuccess() {
 void CLIController::printPasswordPromptRestore() {
     cout << "Put password to restore file from your quarantine." << endl;
     cout << "You have to use exactly the same you've used when imposing on quarantine" << endl;
+    cout << "If you dont want to restore file, use CTRL+C to leave" << endl;
     cout << "Password:" << endl;
 }
 
