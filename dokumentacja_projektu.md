@@ -23,10 +23,14 @@ Przy rozważaniu linkowalności bibliotek należy zwrócić uwagę na dwa aspekt
 1. Rozmiar pliku wykonywalnego po skompilowaniu
 2. Wygoda użytkowania (user-friendly)
 
-Celem znalezienia pewnego kompromisu zdecydowano, że wszystkie biblioteki **domyślnie** zainstalowane na systemie UNIX, będą linkowane dynamicznie - pozwoli to zdecydowanie zmniejszyć rozmiar pliku po skompilowaniu. W aplikacji użyto jednak jednej biblioteki zewnętrznej (OpenSSL), która domyślnie wymaga instalacji. Zalinkowana została zatem w sposób statyczny.
+Celem znalezienia pewnego kompromisu zdecydowano, że wszystkie biblioteki **domyślnie** zainstalowane na systemie UNIX, będą linkowane dynamicznie - pozwoli to zdecydowanie zmniejszyć rozmiar pliku po skompilowaniu. W aplikacji użyto jednak jednej biblioteki zewnętrznej (OpenSSL), która domyślnie wymaga instalacji. Zalinkowana została zatem w sposób statyczny. Linkoowanie za pomocą CMake:
+
+![image](https://user-images.githubusercontent.com/100531644/163632498-7a790dec-7fe1-41ff-9d2f-257afe2daa8f.png)
+
 Rozmiar pliku po skompilowaniu: ok. 230kB.
 
 ![image](https://user-images.githubusercontent.com/100531644/163628829-f804a729-3020-4663-870e-2dfce56c0770.png)
+
 Wygoda użytkownika: wystarczy pobrać program, załadować bazę danych i aplikacja jest gotowa do użytku.
 
 ## Algorytm funkcji skrótu
@@ -80,6 +84,7 @@ dobrze w testach wydajnościowych. Jej największą wadą jest kolizyjność, je
 
 ## Uruchomienia i wyłączanie aplikacji
 Aplikacja uruchamiana jest za każdym razem na potrzebę wykonania jednego polecenia (jedno skanowanie - jedno uruchomienie). W przypadku chęci opuszczenia programu, możliwe jest wysłanie sygnału wyłączenia (Ctrl+C), które zostało obsłużone w odpowiedni sposób (aby zamknąć program w kontrolowany sposób i "wyczyścić" środowisko). Fragment kodu odpowiadający za zatrzymywanie aplikacji:
+
 ![image](https://user-images.githubusercontent.com/100531644/163629609-59c67fc3-e50b-45c3-b39d-d4f3523edcfb.png)
 
 ## Uprawnienia uruchomieniowe aplikacji
@@ -98,6 +103,7 @@ Zaletą takiego podejścia jest bardzo duża uniwersalność (nie potrzebujemy u
 ## Statystyki wydajnościowe działania
 Program wyświetla statystyki w czesie rzeczywistym podczas skanowania rekursywnego katalogu. Wyświetlanie statystyk w przypadku innych operacji uznano za niepotrzebne - są one zazwyczaj bardzo szybkie (wyjątek - skanowanie bardzo dużego pliku, zostało to jednak uznane za zbyt rzadki przypadek).
 Przykład wyżej opisanego mechanizmu (skanowanie katalogu /home):
+
 ![image](https://user-images.githubusercontent.com/100531644/163630464-ab5bc89e-7e8a-420a-bb3c-e8a3443f510f.png)
 
 Ponadto po każdym skanowaniu program pokazuje liczbę niebezpiecznych plików oraz listuje je.
@@ -112,8 +118,27 @@ W obecnej wersji program przyjmuje jako jedyny (obligatoryjny) argument ścieżk
 przygotowanego pliku, będącego *bazą danych skrótów*, sprawdza, czy skrót skanowanego pliku nie znajduje się w bazie. Możliwe są zatem trzy możliwe scenariusze wyniku działania programu:
 - Informacja zwrotna, iż plik jest potencjalnie niebezpieczny
 - Informacja zwrotna, iż plik nie został uznany za niebezpieczny
-- Błąd, związany z nieznalezieniem podanego przez użytkownika pliku
+- Błąd, związany z nieznalezieniem podanego przez użytkownika pliku (bądź związany z filesystemem lub typem pliku)
 ## Mechanizm kwarantanny
+### Działanie
+Mechanizm kwarantanny został zaprojektowany w następujący sposób:
+1. Każdy użytkownik ma swoją własną kwarantannę (również root)
+2. Pliki są umieszczane w kwarantannie po każdym skanowaniu na podstawie wcześniej obliczonych sygnatur. Użytkownik może oczywiście zrezygnować z wysyłania plików na kwarantannę poprzez dostarczenie sygnału wyjścia po ukończeniu skanowania.
+3. Jeśli użytkownik chce skorzystać z mechanizmu kwarantanny, proszony jest o podanie hasła.
+4. Po wpisaniu hasła pliki wysyłane są na kwarantanne (zostają przeniesione i zaszyfrowane)
+5. Użytkownik ma możliwość przywrócenia pliku z kwarantanny
+
+### Mechanizm hasła
+Mechanizm hasła oparty jest na poniższym systemie kryptograficznym:
+1. Na podstawie hasła wprowadzonego przez użytkownika wyliczany jest skrót SHA-256.
+2. Pierwsza połowa skrótu stanowi hasło, druga - wektor inicjalizujący do szyfrowania AES cfb_128
+3. Przed zaszyfrowaniem wyliczany jest skrót MD5 z pliku i zapisywany (słaba funkcja hashująca, ale służy jedynie do sprawdzenia poprawności odszyfrowania)
+4. Przy użyciu powyższych parametrów plik jest szyfrowany
+5. W przypadku chęci "cofnięcia" pliku z kwarantanny, można go odszyfrować znając hasło (kryptografia symetryczna)
+6. Wpisanie złego hasła powoduje błędne odszyfrowanie. Jest to sprawdzane na podstawie wcześniej wyliczonego skrótu
+
+### Podsumowanie rozwiązania
+Kluczową zaletą zaproponowanego rozwiązania jest całkowita izolacja pliku i brak możliwości przywrócenia go z kwarantanny przez innego użytkownika, niż ten, który go na nią wysłał. Hasła nie muszą być przechowywane ani w programie ani w żadnym pliku, gdyż wystarczy zweryfikować poprawność odszyfrowania pliku na kwarantannie. Pewną niedogodnością jest jednak konieczność wpisywania hasła przy każdym wysyłaniu pliku na kwarantannę. Dopuszczone jest również posiadanie wielu haseł (każde skanowanie - jedno hasło).
 ## Czystość kodu i praktyki programistyczne
 Podczas wytwarzania aplikacji korzystano z narzędzia IDE CLion, ułatwiającego dbanie o styl dzięki narzędziu *reformatowania kodu* oraz jego *refaktoryzacji*.
 Ponadto przyjęte zostały następujące konwencje nazewnictwa (nie są one w 100% zgodne ze standardem C++, jednak kluczowym aspektem jest konsekwencja w oznaczeniach, która została zachowana):
