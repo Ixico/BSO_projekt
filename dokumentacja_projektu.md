@@ -99,6 +99,8 @@ Program wyświetla statystyki w czesie rzeczywistym podczas skanowania rekursywn
 Przykład wyżej opisanego mechanizmu (skanowanie katalogu /home):
 ![image](https://user-images.githubusercontent.com/100531644/163630464-ab5bc89e-7e8a-420a-bb3c-e8a3443f510f.png)
 
+Ponadto po każdym skanowaniu program pokazuje liczbę niebezpiecznych plików oraz listuje je.
+
 ## Przypadki użycia
 Antywirus ma działać w dwóch trybach:
 - skanowanie wskazanego pliku za pomocą ścieżki absolutnej bądź relatywnej względem folderu, w którym uruchamiana jest aplikacja
