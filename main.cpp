@@ -8,6 +8,7 @@
 #include "Headers/FileManager.h"
 #include <unistd.h>
 #include "Headers/CLIController.h"
+#include <csignal>
 
 using std::string;
 using std::cout;
@@ -17,8 +18,13 @@ using std::array;
 using std::cerr;
 using std::filesystem::path;
 
+void signalHandler( int signum ) {
+    cout << "Interrupt signal received." << endl;
+    exit(EXIT_FAILURE);
+}
 
 int main(int argc, char* argcv[]) {
+    signal(SIGINT, signalHandler);
     FileController file_controller;
     QuarantineController quarantine_controller;
     path app_path;
