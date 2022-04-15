@@ -82,12 +82,14 @@ int main(int argc, char* argcv[]) {
             vector<path> dangerous;
             dangerous = file_controller.findDangerousFiles(directory_path);
             CLIController::printDangerous(dangerous);
+            if (dangerous.empty()) return EXIT_SUCCESS;
             CLIController::printPasswordPrompt();
             string password;
             std::cin >> password;
             quarantine_controller.setPassword(password);
             for (const auto &item: dangerous) quarantine_controller.imposeQuarantine(item);
         } catch (std::exception &e) {
+            CLIController::unallowedDirectoryScan();
             cout << e.what() << endl;
             quarantine_controller.saveQuarantineRecords();
             return EXIT_FAILURE;

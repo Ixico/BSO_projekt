@@ -40,7 +40,7 @@ void CLIController::printSafe() {
 
 void CLIController::printInitFailure() {
     cout << "Initialization fatal error!" << endl;
-    cout << "Check if directory /home/user/L_Antivirus contains database file!" << endl;
+    cout << "Check if directory /home/user/L_Antivirus (or /root/L_Antivirus if you run sudo) contains database file!" << endl;
 }
 
 void CLIController::printDangerous(const std::vector<std::filesystem::path>& vector1) {
@@ -120,4 +120,10 @@ void CLIController::printPasswordPromptRestore() {
     cout << "Put password to restore file from your quarantine." << endl;
     cout << "You have to use exactly the same you've used when imposing on quarantine" << endl;
     cout << "Password:" << endl;
+}
+
+void CLIController::unallowedDirectoryScan() {
+    cout << "Cannot scan this directory. Possible reasons:" << endl;
+    cout << "It may be dangerous to your system" << endl;
+    cout << "Symlink problem - try specifying real path" << endl;
 }

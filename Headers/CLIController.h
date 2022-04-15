@@ -46,6 +46,8 @@ public:
     static void printImposeSuccess();
 
     static void printPasswordPromptRestore();
+
+    static void unallowedDirectoryScan();
 };
 
 
