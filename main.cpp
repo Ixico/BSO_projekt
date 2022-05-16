@@ -28,14 +28,22 @@ int main() {
     try {
         ServerSocket server(30000);
         while (true) {
+            cout << 1;
             ServerSocket new_sock;
+            cout << 2;
             server.accept(new_sock);
-
+            cout << 3;
             string command;
-            new_sock << command;
+            new_sock >> command;
+            cout << 4;
+            new_sock << "Or0QpRJEusIADN1Rsaidnojoqi";
+            new_sock << "saidnojoqi";
+            cout << 5;
+            cout << command;
 
             std::istringstream ss(command);
             string argument;
+
             vector<string> arguments;
             while (ss >> argument)
             {

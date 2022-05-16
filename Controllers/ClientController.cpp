@@ -1,4 +1,10 @@
 //
+// Created by ixico on 16.05.22.
+//
+
+#include "../Headers/ClientController.h"
+
+//
 // Created by ixico on 12.05.22.
 //
 
@@ -144,3 +150,5 @@ int run(vector<string> arguments) {
         return EXIT_FAILURE;
     }
 }
+
+ClientController::ClientController(const ServerSocket &socket) : socket(socket) {}
