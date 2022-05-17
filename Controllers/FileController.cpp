@@ -16,6 +16,7 @@ using std::filesystem::path;
 
 
 bool FileController::isFileDangerous(path file_path) {
+    if (!hasPermissions(file_path, user)) throw std::invalid_argument("Permission denied!");
     if (!std::filesystem::exists(file_path)) throw std::invalid_argument("File does not exist!"); //existing file or not broken symlink
     file_path = followSymlinks(file_path); //follow symlinks
     if (!std::filesystem::is_regular_file(file_path)) throw std::invalid_argument("File is not regular one!"); //check if regular file
@@ -29,20 +30,19 @@ vector<path> FileController::findDangerousFiles(path directory_path){
     if(!std::filesystem::is_directory(directory_path)) throw std::invalid_argument("It is not directory path!");
     vector<path> files = findFilesInDirectory(directory_path);
     vector<path> dangerous_files;
-    int iterator = 1;
     for (const auto &file : files){
-        std::cout << "Scanned files: " << iterator << "/" << files.size() << "\r";
+        if (!hasPermissions(file, user)) continue;
         try {
             if (isFileDangerous(file)) dangerous_files.push_back(file);
         } catch (std::invalid_argument &e){} //skip files that cannot be scanned
-        iterator++;
     }
     return dangerous_files;
 }
 
 
-FileController::FileController() = default;
 
 void FileController::init(const path& database_path) {
     hashes = readDatabaseRecords(database_path);
 }
+
+FileController::FileController(const string &user) : user(user) {}

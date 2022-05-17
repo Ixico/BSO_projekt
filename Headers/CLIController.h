@@ -12,42 +12,52 @@
 
 class CLIController {
 public:
-    static void printWelcomePage();
-    static void printHelp();
+    static std::string printWelcomePage();
+    static std::string printHelp();
 
-    static void printDangerous();
+    static std::string printDangerous();
 
-    static void printSafe();
+    static std::string printSafe();
 
-    static void printInitFailure();
+    static std::string printInitFailure();
 
-    static void printDangerous(const std::vector<std::filesystem::path>& vector1);
+    static std::string printDangerous(const std::vector<std::filesystem::path>& vector1);
 
-    static void printScanfArgumentProblem();
+    static std::string printScanfArgumentProblem();
 
-    static void printScandArgumentProblem();
+    static std::string printScandArgumentProblem();
 
-    static void printPasswordPrompt();
+    static std::string printPasswordPrompt();
 
-    static void printQuarantineRecords(const std::vector<QuarantineRecord> &vector);
+    static std::string printQuarantineRecords(const std::vector<QuarantineRecord> &vector);
 
-    static void printQuarantineArgumentProblem();
+    static std::string printQuarantineArgumentProblem();
 
-    static void printRestoreArgumentProblem();
+    static std::string printRestoreArgumentProblem();
 
-    static void printRestoreSuccess();
+    static std::string printRestoreSuccess();
 
-    static void printRestoreFailure();
+    static std::string printRestoreFailure();
 
-    static void printArgumentProblem();
+    static std::string printArgumentProblem();
 
-    static void printHelpArgumentProblem();
+    static std::string printHelpArgumentProblem();
 
-    static void printImposeSuccess();
+    static std::string printImposeSuccess();
 
-    static void printPasswordPromptRestore();
+    static std::string printPasswordPromptRestore();
 
-    static void unallowedDirectoryScan();
+    static std::string unallowedDirectoryScan();
+
+    static std::string printManVisit();
+
+    static std::string internalProblem();
+
+    static std::string permissionDenied();
+
+    static std::string notFound();
+
+    static std::string wrongType();
 };
 
 

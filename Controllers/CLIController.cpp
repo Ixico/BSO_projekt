@@ -7,125 +7,89 @@
 using std::cout;
 using std::endl;
 
-void CLIController::printWelcomePage() {
-    cout << "Welcome in Linux Antivirus" << endl;
-    cout << "Use -help flag for usage details:" << endl;
-    cout << "./Antivirus -help" << endl;
+std::string CLIController::printWelcomePage() {
+    return "Visit man page for usage details.\n";
 }
 
-void CLIController::printHelp() {
-    cout << "Linux Antivirus help page" << endl;
-    cout << "USAGE" << endl;
-    cout << "./Antivirus -flag [argument]" << endl;
-    cout << "FLAGS" << endl;
-    cout << "-scanf [file_path]" << " -> scans specified file" << endl;
-    cout << "-scand [directory_path]" << " -> scans specified directory recursively" << endl;
-    cout << "-quarantine" << " -> shows files on quarantine" <<  endl;
-    cout << "-restore [file_name]" << " -> restores file from quarantine" << endl;
-    cout << endl;
-    cout << "After all commands (except -quarantine) you will be asked about password." << endl;
-    cout << "Password is used to encrypt and decrypt file. You may use various password, but once you encrypt file with one, it can be only decrypted with it." <<endl;
-    cout << "Warning: L_Antivirus scans only file(s) if you have sufficient privileges!" << endl;
-    cout << "Files with no read permission will be omitted" << endl;
 
+std::string CLIController::printDangerous() {
+    return "This file my be dangerous!\n";
 }
 
-void CLIController::printDangerous() {
-    cout << "This file my be dangerous!" << endl;
+std::string CLIController::printSafe() {
+    return "File(s) considered to be safe\n";
 }
 
-void CLIController::printSafe() {
-    cout << "File is considered to be safe" << endl;
+std::string CLIController::printInitFailure() {
+    return "Initialization fatal error! Contact server administrator.\n";
 }
 
-void CLIController::printInitFailure() {
-    cout << "Initialization fatal error!" << endl;
-    cout << "Check if directory /home/user/L_Antivirus (or /root/L_Antivirus if you run sudo) contains database file!" << endl;
-}
-
-void CLIController::printDangerous(const std::vector<std::filesystem::path>& vector1) {
+std::string CLIController::printDangerous(const std::vector<std::filesystem::path>& vector1) {
     if (vector1.empty()){
-        cout << "No dangerous files found" << endl;
-        return;
+        return "No dangerous files found\n";
     }
-    cout << "Found " << vector1.size() << " dangerous files:" << endl;
-    for (const auto &item: vector1)
-        cout << item << endl;
+    return "Found dangerous files\n";
 }
 
-void CLIController::printScanfArgumentProblem() {
-    cout << "Misuse of arguments" << endl;
-    cout << "SYNTAX:" << endl;
-    cout << "./L_Antivirus -scanf file_name" << endl;
-}
 
-void CLIController::printScandArgumentProblem() {
-    cout << "Misuse of arguments" << endl;
-    cout << "SYNTAX:" << endl;
-    cout << "./L_Antivirus -scand directory_name" << endl;
-}
-
-void CLIController::printPasswordPrompt() {
+std::string CLIController::printPasswordPrompt() {
     cout << "Put password to secure file in your quarantine." << endl;
     cout << "You will need to use it again if you want to restore your files." << endl;
     cout << "If you do not want to impose quarantine on file, use CTRL+C to leave" << endl;
     cout << "Password:" << endl;
+    return "";
 }
 
-void CLIController::printQuarantineRecords(const std::vector<QuarantineRecord> &vector) {
-    cout << "Files on quarantine" << endl;
-    cout << "relative path | file name" << endl;
-    cout << endl;
+std::string CLIController::printQuarantineRecords(const std::vector<QuarantineRecord> &vector) {
+    std::string response;
+    if (vector.empty()) return "No quarantine records.\n";
     for (const auto &item: vector) {
-        cout << item.file_path << " | " << item.file_path.stem() << endl;
+        response.append(item.file_path.stem());
+        response.append(" | ");
     }
+    return response+"\n";
 }
 
-void CLIController::printRestoreArgumentProblem() {
-    cout << "Misuse of arguments" << endl;
-    cout << "SYNTAX:" << endl;
-    cout << "./L_Antivirus -restore file_name" << endl;
+
+
+std::string CLIController::printRestoreFailure() {
+    return "Wrong password! Could not restore file form quarantine.\n";
 }
 
-void CLIController::printQuarantineArgumentProblem() {
-    cout << "Misuse of arguments" << endl;
-    cout << "SYNTAX:" << endl;
-    cout << "./L_Antivirus -quarantine" << endl;
+std::string CLIController::printRestoreSuccess() {
+    return "File successfully restored from quarantine!\n";
 }
 
-void CLIController::printRestoreFailure() {
-    cout << "Wrong password! Could not restore file form quarantine." << endl;
+
+std::string CLIController::printImposeSuccess() {
+    return "Found some dangerous files and imposed them on quarantine.\n";
 }
 
-void CLIController::printRestoreSuccess() {
-    cout << "File successfully restored from quarantine!" << endl;
+
+std::string CLIController::unallowedDirectoryScan() {
+    return "Cannot scan this directory.\n";
 }
 
-void CLIController::printArgumentProblem() {
-    cout << "Invalid argument" << endl;
-    cout << "Look at the help page for more details:" << endl;
-    cout << "./L_Antivirus -help" << endl;
+std::string CLIController::printManVisit() {
+    return "Invalid command! Visit man page for details of usage.\n";
 }
 
-void CLIController::printHelpArgumentProblem() {
-    cout << "Misuse of arguments" << endl;
-    cout << "SYNTAX:" << endl;
-    cout << "./L_Antivirus -help" << endl;
+std::string CLIController::internalProblem() {
+    return "Internal fatal error! Contact server administrator.\n";
 }
 
-void CLIController::printImposeSuccess() {
-    cout << "File(s) successfully imposed on quarantine." << endl;
+std::string CLIController::permissionDenied() {
+    return "Permission denied! You can only work with files within your home/user directory.\n";
 }
 
-void CLIController::printPasswordPromptRestore() {
-    cout << "Put password to restore file from your quarantine." << endl;
-    cout << "You have to use exactly the same you've used when imposing on quarantine" << endl;
-    cout << "If you dont want to restore file, use CTRL+C to leave" << endl;
-    cout << "Password:" << endl;
+std::string CLIController::printHelp() {
+    return "Visit L_Antivirus page ... \n";
 }
 
-void CLIController::unallowedDirectoryScan() {
-    cout << "Cannot scan this directory. Possible reasons:" << endl;
-    cout << "It may be dangerous to your system" << endl;
-    cout << "Symlink problem - try specifying real path" << endl;
+std::string CLIController::notFound() {
+    return "File/directory nor found!\n";
+}
+
+std::string CLIController::wrongType() {
+    return "Path specifies wrong type of file.\n";
 }

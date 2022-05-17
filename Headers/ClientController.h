@@ -14,10 +14,12 @@ public:
     void initClientSession();
 
 private:
-    int run(std::vector<std::string> arguments);
+    std::string run(std::vector<std::string> arguments);
     bool handshake();
     ServerSocket *socket;
     std::string calculateValidResponse(std::string password_hash, std::string communication_salt);
+    std::string user;
+    std::string password_hash;
 public:
     ClientController(ServerSocket *socket);
 };

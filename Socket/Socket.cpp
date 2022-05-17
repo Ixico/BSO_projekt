@@ -30,7 +30,6 @@ bool Socket::create()
     m_sock = socket ( AF_INET,
                       SOCK_STREAM,
                       0 );
-
     if ( ! is_valid() )
         return false;
 

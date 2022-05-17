@@ -18,6 +18,7 @@
 #include "../Headers/FileManager.h"
 #include <unistd.h>
 #include "../Headers/CLIController.h"
+#include "../Socket/SocketException.h"
 #include <csignal>
 #include <algorithm>
 #include <thread>
@@ -39,24 +40,58 @@ void signalHandler(int signum) {
 }
 
 void ClientController::initClientSession() {
-    bool authenticated = ClientController::handshake();
-    while (true){}
-}
-bool ClientController::handshake() {
+    try {
+        bool authenticated = ClientController::handshake();
+        if (!authenticated) {
+            *socket << "Wrong password!\n";
+            delete (socket);
+            return;
+        }
 
-    string user;
+        *socket << "Welcome to L_Antivirus\n";
+        string command;
+        *socket >> command;
+        while (command != "-quit") {
+            std::istringstream ss(command);
+            string argument;
+
+            vector<string> arguments;
+            while (ss >> argument) {
+                arguments.push_back(argument);
+            }
+
+            *socket << run(arguments);
+
+            *socket >> command;
+        }
+        delete (socket);
+        return;
+
+    } catch (SocketException &e) {
+        cout << e.description() << endl;
+        return;
+    }
+}
+
+bool ClientController::handshake() {
 
     *socket >> user;
     cout << user << endl;
     user.erase(std::remove(user.begin(), user.end(), '\n'),
                user.end());//remove newline character at the end
-    string hash = findInShadowFile(user);
+    string hash;
+    try {
+        hash = findInShadowFile(user);
+    } catch (std::invalid_argument &e) {
+        return false;
+    }
+    password_hash = hash;
     std::stringstream ss(hash);
     string salt;
     std::getline(ss, salt, '$');
     std::getline(ss, salt, '$');
     std::getline(ss, salt, '$');
-    string communication_salt = "asdasdasdasdasda";
+    string communication_salt = "asdasdasdasdasda"; // TODO: random string
     *socket << salt << "\n";
     *socket << communication_salt << "\n";
 
@@ -64,121 +99,99 @@ bool ClientController::handshake() {
     string client_response;
     *socket >> client_response;
     client_response.erase(std::remove(client_response.begin(), client_response.end(), '\n'),
-               client_response.end());//remove newline character at the end
+                          client_response.end());//remove newline character at the end
     cout << client_response << endl;
     return valid_response == client_response;
 }
 
 
-int ClientController::run(std::vector<std::string> arguments) {
+string ClientController::run(std::vector<std::string> arguments) {
     signal(SIGINT, signalHandler);
-    FileController file_controller;
+    FileController file_controller(user);
     QuarantineController quarantine_controller;
-    path app_path;
-    if (geteuid() == 0) {
-        app_path = "/root/L_Antivirus";
-    } else {
-        string user_name = getlogin();
-        app_path = "/home/" + user_name + "/L_Antivirus";
-    }
+    path app_path = "/root/L_Antivirus";
     try {
         quarantine_controller.init(app_path / "quarantine");
         file_controller.init(app_path / "database");
     } catch (std::exception &e) {
-        CLIController::printInitFailure();
-        return EXIT_FAILURE;
+        return CLIController::internalProblem();
     }
 
     if (arguments.size() == 0) {
-        CLIController::printWelcomePage();
-        return EXIT_SUCCESS;
+        return CLIController::printManVisit();
     }
 
     if (arguments.at(0) == string("-scanf")) {
         if (arguments.size() != 2) {
-            CLIController::printScanfArgumentProblem();
-            return EXIT_FAILURE;
+            return CLIController::printManVisit();
         }
         path file_path = arguments.at(1);
+        if (!std::filesystem::exists(file_path)) return CLIController::notFound();
         try {
             if (file_controller.isFileDangerous(file_path)) {
-                CLIController::printDangerous();
-                CLIController::printPasswordPrompt();
-                string password;
-                std::cin >> password;
+                string password = password_hash;
                 quarantine_controller.setPassword(password);
                 quarantine_controller.imposeQuarantine(file_path);
                 quarantine_controller.saveQuarantineRecords();
-                CLIController::printImposeSuccess();
+                return CLIController::printImposeSuccess();
             } else {
-                CLIController::printSafe();
+                return CLIController::printSafe();
             }
-            return EXIT_SUCCESS;
         } catch (std::exception &e) {
             cout << e.what() << endl;
-            return EXIT_FAILURE;
+            return CLIController::wrongType();
         }
     }
     if (arguments.at(0) == string("-scand")) {
         if (arguments.size() != 2) {
-            CLIController::printScandArgumentProblem();
-            return EXIT_FAILURE;
+            return CLIController::printManVisit();
         }
         path directory_path = arguments.at(1);
+        if (!std::filesystem::exists(directory_path)) return CLIController::notFound();
+        if (!hasPermissions(directory_path, user)) return CLIController::permissionDenied();
         try {
             vector<path> dangerous;
             dangerous = file_controller.findDangerousFiles(directory_path);
-            CLIController::printDangerous(dangerous);
-            if (dangerous.empty()) return EXIT_SUCCESS;
-            CLIController::printPasswordPrompt();
-            string password;
-            std::cin >> password;
+            if (dangerous.empty()) return CLIController::printSafe();
+            string password = password_hash;
             quarantine_controller.setPassword(password);
             for (const auto &item: dangerous) quarantine_controller.imposeQuarantine(item);
         } catch (std::exception &e) {
-            CLIController::unallowedDirectoryScan();
             cout << e.what() << endl;
-            quarantine_controller.saveQuarantineRecords();
-            return EXIT_FAILURE;
+            return CLIController::wrongType();
         }
         quarantine_controller.saveQuarantineRecords();
-        CLIController::printImposeSuccess();
-        return EXIT_SUCCESS;
+        return CLIController::printImposeSuccess();
     } else if (arguments.at(0) == string("-quarantine")) {
         if (arguments.size() != 1) {
-            CLIController::printQuarantineArgumentProblem();
-            return EXIT_FAILURE;
+            return CLIController::printManVisit();
         }
-        CLIController::printQuarantineRecords(quarantine_controller.getQuarantineRecords());
-        return EXIT_SUCCESS;
+        return CLIController::printQuarantineRecords(
+                quarantine_controller.getQuarantineRecords());
     } else if (arguments.at(0) == string("-restore")) {
-        if (arguments.size() != 3) {
-            CLIController::printRestoreArgumentProblem();
-            return EXIT_FAILURE;
+        if (arguments.size() != 2) {
+            return CLIController::printManVisit();
         }
-        string password = arguments.at(2);
+        string password = password_hash;
         quarantine_controller.setPassword(password);
         try {
-            quarantine_controller.removeQuarantine(arguments.at(1)) ? CLIController::printRestoreSuccess()
-                                                                    : CLIController::printRestoreFailure();
+            bool success = quarantine_controller.removeQuarantine(arguments.at(1));
+            quarantine_controller.saveQuarantineRecords();
+            return success ? CLIController::printRestoreSuccess() : CLIController::printRestoreFailure();
         } catch (std::invalid_argument &e) {
             cout << e.what() << endl;
+            return CLIController::internalProblem();
         }
-        quarantine_controller.saveQuarantineRecords();
-        return EXIT_SUCCESS;
     } else if (arguments.at(0) == string("-help")) {
         if (arguments.size() != 1) {
-            CLIController::printHelpArgumentProblem();
-            return EXIT_FAILURE;
+            return CLIController::printManVisit();
         }
-        CLIController::printHelp();
-        return EXIT_SUCCESS;
+        return CLIController::printHelp();
     } else {
-        CLIController::printArgumentProblem();
-        return EXIT_FAILURE;
-
+        return CLIController::printManVisit();
     }
 }
+
 ClientController::ClientController(ServerSocket *socket) : socket(socket) {}
 
 std::string ClientController::calculateValidResponse(std::string password_hash, std::string communication_salt) {

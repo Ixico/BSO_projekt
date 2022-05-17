@@ -18,5 +18,8 @@ public:
 
 private:
     std::unordered_set <std::string> hashes;
+    std::string user;
+public:
+    FileController(const std::string &user);
 };
 #endif //ANTIVIRUS_FILECONTROLLER_H

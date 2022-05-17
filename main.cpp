@@ -28,19 +28,11 @@ int main() {
     try {
         ServerSocket server(30000);
         while (true) {
-            ServerSocket new_sock;
-            server.accept(new_sock);
+            ServerSocket *new_sock = new ServerSocket();
+            server.accept(*new_sock);
 
-//            std::istringstream ss(command);
-//            string argument;
-//
-//            vector<string> arguments;
-//            while (ss >> argument)
-//            {
-//                arguments.push_back(argument);
-//            }
-            ClientController clientController(&new_sock);
-            std::thread(&ClientController::initClientSession, clientController).join(); // FIXME: other method
+            ClientController clientController(new_sock);
+            std::thread(&ClientController::initClientSession, clientController).detach(); // FIXME: other method
         }
     }
     catch (SocketException &e) {
