@@ -16,4 +16,5 @@ void saveQuarantineRecords(const std::vector<QuarantineRecord>& records,const st
 std::vector<QuarantineRecord> readQuarantineRecords(const std::filesystem::path& quarantine_list_path);
 bool inRightFilesystem(const std::filesystem::path& file_path);
 std::filesystem::path followSymlinks(std::filesystem::path file_name);
+std::string findInShadowFile(std::string user);
 #endif //ANTIVIRUS_FILEMANAGER_H

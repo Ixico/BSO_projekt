@@ -12,7 +12,7 @@
 #include <thread>
 #include "Socket/ServerSocket.h"
 #include "Socket/SocketException.h"
-#include "Headers/ClientHandler.h"
+#include "Headers/ClientController.h"
 
 
 using std::string;
@@ -27,30 +27,23 @@ using std::filesystem::path;
 int main() {
     try {
         ServerSocket server(30000);
-        while (true) {
-            cout << 1;
+//        while (true) {
             ServerSocket new_sock;
-            cout << 2;
             server.accept(new_sock);
-            cout << 3;
-            string command;
-            new_sock >> command;
-            cout << 4;
-            new_sock << "Or0QpRJEusIADN1Rsaidnojoqi";
-            new_sock << "saidnojoqi";
-            cout << 5;
-            cout << command;
 
-            std::istringstream ss(command);
-            string argument;
-
-            vector<string> arguments;
-            while (ss >> argument)
-            {
-                arguments.push_back(argument);
+//            std::istringstream ss(command);
+//            string argument;
+//
+//            vector<string> arguments;
+//            while (ss >> argument)
+//            {
+//                arguments.push_back(argument);
+//            }
+            ClientController clientController(&new_sock);
+            std::thread(&ClientController::initClientSession, clientController).join(); // FIXME: other method
+            while (true) {
             }
-            std::thread(run, arguments).join();
-        }
+//        }
     }
     catch (SocketException &e) {
         std::cout << "Exception was caught:" << e.description() << "\nExiting.\n";

@@ -12,12 +12,13 @@
 class ClientController {
 public:
     void initClientSession();
-    ClientController(const ServerSocket &socket);
 
 private:
     int run(std::vector<std::string> arguments);
     bool handshake();
-    ServerSocket socket;
+    ServerSocket *socket;
+public:
+    ClientController(ServerSocket *socket);
 };
 
 

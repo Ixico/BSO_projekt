@@ -3,6 +3,8 @@
 #include <fstream>
 #include <filesystem>
 #include <sys/statfs.h>
+#include <regex>
+
 using std::string;
 using std::filesystem::recursive_directory_iterator;
 using std::vector;
@@ -74,4 +76,21 @@ bool inRightFilesystem(const path& file_path){
 
     if (statfs(file_path.string().c_str(),&buf) == -1) throw std::invalid_argument("Cannot check file's filesystem!");
     return buf.f_type == 61267;
+}
+
+string findInShadowFile(string user) {
+    std::ifstream file("/etc/shadow");
+    if (!file.is_open()) throw std::invalid_argument("Cannot open shadow file!");
+    string line;
+    string user_name;
+    string hash;
+    while (std::getline(file, line)) {
+        std::istringstream ss(line);
+        std::getline(ss, user_name, ':');
+        if (user_name == user){
+            std::getline(ss, hash, ':');
+            return hash;
+        }
+    }
+    throw std::invalid_argument("Given user does not exist!");
 }
