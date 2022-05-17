@@ -38,10 +38,9 @@ void signalHandler(int signum) {
     exit(EXIT_FAILURE);
 }
 
-
-
 void ClientController::initClientSession() {
-    ClientController::handshake();
+    bool authenticated = ClientController::handshake();
+    while (true){}
 }
 bool ClientController::handshake() {
 
@@ -57,25 +56,17 @@ bool ClientController::handshake() {
     std::getline(ss, salt, '$');
     std::getline(ss, salt, '$');
     std::getline(ss, salt, '$');
-    string communication_salt = "asdasd";
-    cout << salt << endl;
+    string communication_salt = "asdasdasdasdasda";
     *socket << salt << "\n";
     *socket << communication_salt << "\n";
 
-    char key[BUFSIZE] = "zaqwsx123"; //The string you want to hash
-    char salt_origin[BUFSIZE] = ""; //Salt string
-    char salt2[BUFSIZE];
-    char encrypted[BUFSIZE]; //For storing results
-
-    sprintf(salt2, "$6$%s", salt_origin); //Salt shaping, id specification (described later)
-    strcpy(encrypted, crypt(key, salt2)); //The encrypted variable
-    //String"$6$example$(Hashed key)"Is stored
-
-    string a = encrypted;
-
-
-
-    return false;
+    string valid_response = calculateValidResponse(hash, communication_salt);
+    string client_response;
+    *socket >> client_response;
+    client_response.erase(std::remove(client_response.begin(), client_response.end(), '\n'),
+               client_response.end());//remove newline character at the end
+    cout << client_response << endl;
+    return valid_response == client_response;
 }
 
 
@@ -188,5 +179,18 @@ int ClientController::run(std::vector<std::string> arguments) {
 
     }
 }
-
 ClientController::ClientController(ServerSocket *socket) : socket(socket) {}
+
+std::string ClientController::calculateValidResponse(std::string password_hash, std::string communication_salt) {
+    char encrypted[BUFSIZE]; //For storing results
+
+    string blank = "";
+    char *key = &password_hash[0];
+    char *salt_origin = &communication_salt[0];
+    char *salt = &blank[0];
+
+    sprintf(salt, "$6$%s", salt_origin); //Salt shaping, id specification (described later)
+    strcpy(encrypted, crypt(key, salt)); //The encrypted variable
+
+    return encrypted;
+}

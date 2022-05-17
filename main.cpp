@@ -27,7 +27,7 @@ using std::filesystem::path;
 int main() {
     try {
         ServerSocket server(30000);
-//        while (true) {
+        while (true) {
             ServerSocket new_sock;
             server.accept(new_sock);
 
@@ -41,9 +41,7 @@ int main() {
 //            }
             ClientController clientController(&new_sock);
             std::thread(&ClientController::initClientSession, clientController).join(); // FIXME: other method
-            while (true) {
-            }
-//        }
+        }
     }
     catch (SocketException &e) {
         std::cout << "Exception was caught:" << e.description() << "\nExiting.\n";
