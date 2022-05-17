@@ -203,3 +203,8 @@ Proces unikania błędów bezpieczeństwa składał się z bardzo wielu kroków:
 2. Przeprowadzenie testów użytkowych, celowego wprowadzania złego inputu, testów funkcjonalnych
 3. Dynamiczna analiza kodu - sprawdzenie działania
 4. Obsługa błędów poprzez mechanizm wyjątków
+
+# Część zaawansowana
+Aplikacja została przeniesiona i działa w architekturze klient-serwer przy użyciu protokołu TCP. Taka architektura wymusza obsługi wielowątkowości.
+Zmieniły się również delikatnie założenia aplikacji - powinna działać ona teraz na uprawnieniach roota. Użytkownicy chcący z niej skorzystać, muszą się zautoryzować przy pomocy hasła systemowego (sam mechanizm weryfikacji jest bezpieczny z punktu widzenia użytkownika). Komunikacja po autoryzacji jest nieszyfrowana, jednak zostało uznane, iż nie ma takiej potrzeby (przesyłane dane nie są poufne).
+Dużym ograniczeniem założonego podejścia jest fakt, iż root jest administratorem ww. serwera. Zatem ma on dostęp do plików na kwarantannie, inaczej niż było to w części podstawowej. W przeciwnym przypadku jednak nie byłaby możliwa bezpieczna autoryzacja.
